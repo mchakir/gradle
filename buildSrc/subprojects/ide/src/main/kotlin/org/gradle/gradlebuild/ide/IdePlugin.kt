@@ -370,13 +370,15 @@ open class IdePlugin : Plugin<Project> {
         val rootProject = docsProject.rootProject
         val releaseNotesMarkdown: PegDown by docsProject.tasks
         val releaseNotes: Copy by docsProject.tasks
+        val baseGeneratedApiJarCacheDir = rootProject.file("intTestHomeDir/generatedApiJars/${rootProject.version}").absolutePath
         val vmParameter = mutableListOf(
             "-ea",
             "-Dorg.gradle.docs.releasenotes.source=${releaseNotesMarkdown.markdownFile}",
             "-Dorg.gradle.docs.releasenotes.rendered=${releaseNotes.destinationDir.resolve(releaseNotes.property("fileName") as String)}",
             "-DintegTest.gradleHomeDir=\$MODULE_DIR\$/build/integ test",
             "-DintegTest.gradleUserHomeDir=${rootProject.file("intTestHomeDir").absolutePath}",
-            "-DintegTest.gradleGeneratedApiJarCacheDir=${rootProject.file("intTestHomeDir/generatedApiJars/${rootProject.version}/")}\$MODULE_NAME\$-idea/",
+            "-DintegTest.ideaModuleWorkingDir=\$MODULE_WORKING_DIR\$",
+            "-DintegTest.gradleGeneratedApiJarCacheDir=$baseGeneratedApiJarCacheDir/%MODULE_NAME%-idea",
             "-DintegTest.libsRepo=${rootProject.file("build/repo").absolutePath}",
             "-Dorg.gradle.integtest.daemon.registry=${rootProject.file("build/daemon").absolutePath}",
             "-DintegTest.distsDir=${rootProject.base.distsDir.absolutePath}",

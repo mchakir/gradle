@@ -19,6 +19,7 @@ package org.gradle.integtests.fixtures.executer;
 import org.gradle.test.fixtures.file.TestFile;
 import org.gradle.util.GradleVersion;
 
+import javax.annotation.Nullable;
 import java.io.File;
 
 /**
@@ -54,7 +55,8 @@ public class IntegrationTestBuildContext {
     }
 
     public TestFile getGradleGeneratedApiJarCacheDir() {
-        return file("integTest.gradleGeneratedApiJarCacheDir", null);
+        String generatedApiJarCacheDir = mandatorySystemProperty("integTest.gradleGeneratedApiJarCacheDir");
+        return new TestFile(replaceIdeaModuleNameMacro(generatedApiJarCacheDir));
     }
 
     public TestFile getTmpDir() {
@@ -101,21 +103,52 @@ public class IntegrationTestBuildContext {
         return new ReleasedGradleDistribution(version, previousVersionDir.file(version));
     }
 
-    protected static TestFile file(String propertyName, String defaultFile) {
-        String defaultPath;
-        if (defaultFile == null) {
-            defaultPath = null;
-        } else if (new File(defaultFile).isAbsolute()) {
-            defaultPath = defaultFile;
-        } else {
-            defaultPath = TEST_DIR.file(defaultFile).getAbsolutePath();
+    protected static TestFile file(String propertyName, String defaultPath) {
+        String path = System.getProperty(propertyName);
+        if (path != null) {
+            return new TestFile(new File(path));
         }
-        String path = System.getProperty(propertyName, defaultPath);
-        if (path == null) {
-            throw new RuntimeException(String.format("You must set the '%s' property to run the integration tests. The default passed was: '%s'",
-                propertyName, defaultFile));
+        if (defaultPath == null) {
+            throw propertyMustBeSetException(propertyName);
         }
-        return new TestFile(new File(path));
+        return testFile(defaultPath);
+    }
+
+    private static TestFile testFile(String path) {
+        File file = new File(path);
+        return file.isAbsolute()
+            ? new TestFile(file)
+            : new TestFile(TEST_DIR.file(path).getAbsoluteFile());
+    }
+
+    private String mandatorySystemProperty(String propertyName) {
+        String property = System.getProperty(propertyName);
+        if (property == null) {
+            throw propertyMustBeSetException(propertyName);
+        }
+        return property;
+    }
+
+    private String replaceIdeaModuleNameMacro(String string) {
+        // when running from IntelliJ IDEA, the MODULE_NAME macro needs to be translated here
+        // for IDEA currently only handles $MODULE_DIR$ and $PROJECT_DIR$ in Run configuration settings
+        // We use `%` as a separator to differentiate from IDEA's `$`
+        String ideaModuleName = getIdeaModuleName();
+        return ideaModuleName != null
+            ? string.replace("%MODULE_NAME%", ideaModuleName)
+            : string;
+    }
+
+    @Nullable
+    private String getIdeaModuleName() {
+        String ideaModuleWorkingDir = System.getProperty("integTest.ideaModuleWorkingDir");
+        return ideaModuleWorkingDir != null
+            ? new File(ideaModuleWorkingDir).getName()
+            : null;
+    }
+
+    private static RuntimeException propertyMustBeSetException(String propertyName) {
+        return new RuntimeException("You must set the '" + propertyName + "' property to run the integration tests.");
     }
 
 }
