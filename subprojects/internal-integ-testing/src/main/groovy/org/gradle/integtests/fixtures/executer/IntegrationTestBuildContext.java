@@ -141,9 +141,9 @@ public class IntegrationTestBuildContext {
 
     @Nullable
     private String getIdeaModuleName() {
-        String ideaModuleWorkingDir = System.getProperty("integTest.ideaModuleWorkingDir");
-        return ideaModuleWorkingDir != null
-            ? new File(ideaModuleWorkingDir).getName()
+        String ideaModuleDir = System.getProperty("integTest.ideaModuleDir");
+        return ideaModuleDir != null
+            ? new File(ideaModuleDir).getName()
             : null;
     }
 
