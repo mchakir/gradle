@@ -46,8 +46,10 @@ public class DefaultGeneratedGradleJarCache implements GeneratedGradleJarCache, 
     }
 
     private CacheBuilder cacheBuilderFor(CacheRepository cacheRepository) {
-        String baseDirPath = System.getProperty(BASE_DIR_OVERRIDE_PROPERTY);
-        return baseDirPath == null ? cacheRepository.cache(CACHE_KEY) : cacheRepository.cache(new File(baseDirPath));
+        String baseDirOverride = System.getProperty(BASE_DIR_OVERRIDE_PROPERTY);
+        return baseDirOverride != null
+            ? cacheRepository.cache(new File(baseDirOverride))
+            : cacheRepository.cache(CACHE_KEY);
     }
 
     @Override
