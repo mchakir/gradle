@@ -20,6 +20,7 @@ package org.gradle.integtests.composite
 import org.gradle.integtests.fixtures.AbstractIntegrationSpec
 import org.gradle.integtests.fixtures.Sample
 import org.gradle.integtests.fixtures.UsesSample
+import org.gradle.test.fixtures.file.LeaksFileHandles
 import org.junit.Rule
 
 class SamplesCompositeBuildIntegrationTest extends AbstractIntegrationSpec {
@@ -99,6 +100,7 @@ class SamplesCompositeBuildIntegrationTest extends AbstractIntegrationSpec {
     }
 
     @UsesSample('compositeBuilds/plugin-dev')
+    @LeaksFileHandles
     def "can develop plugin with composite"() {
         when:
         executer.inDirectory(sample.dir.file("consumer")).withArguments("--include-build", "../greeting-plugin")
