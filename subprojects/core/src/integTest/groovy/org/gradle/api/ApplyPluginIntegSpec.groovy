@@ -18,7 +18,6 @@ package org.gradle.api
 
 import org.gradle.integtests.fixtures.AbstractIntegrationSpec
 import org.gradle.integtests.fixtures.executer.UnexpectedBuildFailure
-import org.gradle.test.fixtures.file.TestFile
 import org.gradle.testfixtures.ProjectBuilder
 import org.gradle.util.GradleVersion
 import org.gradle.util.UsesNativeServices
